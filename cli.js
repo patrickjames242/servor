@@ -74,15 +74,22 @@ const open =
 
   // Parse arguments from the command line
 
+  const jsDelay = (() => {
+    const delayStr = process.argv.find((x) => x.startsWith('--js-delay'))?.split('=')[1];
+    if (delayStr) return parseFloat(delayStr);
+    return null;
+  })();
+
   const { root, protocol, port, ips, url } = await servor({
-    root: args[0],
-    fallback: args[1],
-    port: args[2],
-    reload: !!~process.argv.indexOf('--reload'),
-    module: !!~process.argv.indexOf('--module'),
-    static: !!~process.argv.indexOf('--static'),
-    credentials,
-  });
+		root: args[0],
+		fallback: args[1],
+		port: args[2],
+		reload: !!~process.argv.indexOf("--reload"),
+		module: !!~process.argv.indexOf("--module"),
+		static: !!~process.argv.indexOf("--static"),
+		credentials,
+		jsDelay: jsDelay,
+	});
 
   // Output server details to the console
 

@@ -20,6 +20,7 @@ module.exports = async ({
   inject = '',
   credentials,
   port,
+  jsDelay = null
 } = {}) => {
   // Try start on specified port then fail or find a free port
 
@@ -82,14 +83,20 @@ module.exports = async ({
   };
 
   const sendFile = (res, status, file, ext, encoding = 'binary') => {
-    if (['js', 'css', 'html', 'json', 'xml', 'svg'].includes(ext)) {
-      res.setHeader('content-encoding', 'gzip');
-      file = zlib.gzipSync(utf8(file));
-      encoding = 'utf8';
+    const action = () => {
+      if (['js', 'css', 'html', 'json', 'xml', 'svg'].includes(ext)) {
+        res.setHeader('content-encoding', 'gzip');
+        file = zlib.gzipSync(utf8(file));
+        encoding = 'utf8';
+      }
+      res.writeHead(status, { 'content-type': mimeTypes(ext) });
+      res.write(file, encoding);
+      res.end();
     }
-    res.writeHead(status, { 'content-type': mimeTypes(ext) });
-    res.write(file, encoding);
-    res.end();
+
+    if (ext === 'js' && jsDelay) {
+      setTimeout(action, jsDelay);
+    } else action();
   };
 
   const sendMessage = (res, channel, data) => {
